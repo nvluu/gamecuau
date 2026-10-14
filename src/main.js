@@ -3,11 +3,13 @@ import './style.css';
 
 const W = 360, H = 640, DECK = 533;
 const TEXT_RESOLUTION = Math.min(4, Math.max(2, window.devicePixelRatio * Math.min(window.innerWidth / W, window.innerHeight / H)));
+const RENDER_SCALE = Math.ceil(TEXT_RESOLUTION);
 const DROP_LEFT = 36, DROP_RIGHT = W - 36;
 const readBest = () => { try { return Number(localStorage.getItem('cu-au-best')) || 0; } catch { return 0; } };
 class Tower extends Phaser.Scene {
   constructor() { super('Tower'); }
   create() {
+    this.cameras.main.setOrigin(0, 0).setZoom(RENDER_SCALE);
     this.best = readBest(); this.soundOn = true; this.mode = 'menu'; this.nuts = [];
     this.drawWorld(); this.makeTextures(); this.makeBuffalo();
     this.matter.world.setBounds(-500, -20000, 1360, 21000, 32, false, false, false, false);
@@ -15,7 +17,7 @@ class Tower extends Phaser.Scene {
     this.matter.add.rectangle(223, DECK, 188, 18, { isStatic: true, friction: .85, label: 'cart' });
     this.hud = this.add.text(16, 19, '', {fontFamily:'Arial',fontSize:'16px',color:'#263d32',fontStyle:'bold'}).setResolution(TEXT_RESOLUTION).setScrollFactor(0).setDepth(20);
     this.mute = this.button(316, 33, '♪', () => { this.soundOn = !this.soundOn; this.mute.setText(this.soundOn ? '♪' : '×♪'); }, 44, 34).setScrollFactor(0).setDepth(30);
-    this.input.on('pointerdown', pointer => { if (this.mode === 'play' && pointer.y > 65 && this.active) this.drop(); });
+    this.input.on('pointerdown', pointer => { if (this.mode === 'play' && pointer.y / RENDER_SCALE > 65 && this.active) this.drop(); });
     this.events.on('shutdown', () => { if (this.audio) this.audio.close(); });
     this.showMenu();
   }
@@ -122,6 +124,6 @@ class Tower extends Phaser.Scene {
     this.cameras.main.scrollY=Phaser.Math.Linear(this.cameras.main.scrollY,this.targetScroll,.045);
   }
 }
-export const game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#ffedba',scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.NO_CENTER},physics:{default:'matter',matter:{enableSleeping:true}},scene:Tower});
+export const game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W * RENDER_SCALE,height:H * RENDER_SCALE,backgroundColor:'#ffedba',scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.NO_CENTER},physics:{default:'matter',matter:{enableSleeping:true}},scene:Tower});
 // Development-only inspection for browser smoke checks; stripped from production.
 if (import.meta.env.DEV) window.__towerGame = game;
