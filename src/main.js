@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import './style.css';
 
 const W = 360, H = 640, DECK = 533;
+const TEXT_RESOLUTION = Math.min(4, Math.max(2, window.devicePixelRatio * Math.min(window.innerWidth / W, window.innerHeight / H)));
+const DROP_LEFT = 36, DROP_RIGHT = W - 36;
 const readBest = () => { try { return Number(localStorage.getItem('cu-au-best')) || 0; } catch { return 0; } };
 class Tower extends Phaser.Scene {
   constructor() { super('Tower'); }
@@ -11,9 +13,9 @@ class Tower extends Phaser.Scene {
     this.matter.world.setBounds(-500, -20000, 1360, 21000, 32, false, false, false, false);
     this.matter.world.setGravity(0, 1.15);
     this.matter.add.rectangle(223, DECK, 188, 18, { isStatic: true, friction: .85, label: 'cart' });
-    this.hud = this.add.text(16, 19, '', {fontFamily:'Arial',fontSize:'16px',color:'#263d32',fontStyle:'bold'}).setScrollFactor(0).setDepth(20);
+    this.hud = this.add.text(16, 19, '', {fontFamily:'Arial',fontSize:'16px',color:'#263d32',fontStyle:'bold'}).setResolution(TEXT_RESOLUTION).setScrollFactor(0).setDepth(20);
     this.mute = this.button(316, 33, '♪', () => { this.soundOn = !this.soundOn; this.mute.setText(this.soundOn ? '♪' : '×♪'); }, 44, 34).setScrollFactor(0).setDepth(30);
-    this.input.on('pointerdown', pointer => { if (this.mode === 'play' && pointer.y > 65 && !this.waiting) this.drop(); });
+    this.input.on('pointerdown', pointer => { if (this.mode === 'play' && pointer.y > 65 && this.active) this.drop(); });
     this.events.on('shutdown', () => { if (this.audio) this.audio.close(); });
     this.showMenu();
   }
@@ -48,38 +50,44 @@ class Tower extends Phaser.Scene {
     this.buffalo.add([g,this.eye,this.tail]);
     this.tweens.add({targets:this.tail,angle:18,duration:650,yoyo:true,repeat:-1});
     this.time.addEvent({delay:2900,loop:true,callback:()=>this.tweens.add({targets:this.eye,scaleY:.1,duration:100,yoyo:true})});
-    this.bubble=this.add.text(77,461,'',{fontSize:'13px',color:'#31473a',backgroundColor:'#fff7d8',padding:{x:8,y:6}}).setDepth(10).setVisible(false);
+    this.bubble=this.add.text(77,461,'',{fontSize:'13px',color:'#31473a',backgroundColor:'#fff7d8',padding:{x:8,y:6}}).setResolution(TEXT_RESOLUTION).setDepth(10).setVisible(false);
   }
   button(x,y,label,action,width=220,height=45) {
-    const t=this.add.text(x,y,label,{fontFamily:'Arial',fontSize:'20px',fontStyle:'bold',color:'#fff9df',backgroundColor:'#38634c',fixedWidth:width,fixedHeight:height,align:'center',padding:{top:10}}).setOrigin(.5).setInteractive({useHandCursor:true});
+    const t=this.add.text(x,y,label,{fontFamily:'Arial',fontSize:'20px',fontStyle:'bold',color:'#fff9df',backgroundColor:'#38634c',fixedWidth:width,fixedHeight:height,align:'center',padding:{top:10}}).setResolution(TEXT_RESOLUTION).setOrigin(.5).setInteractive({useHandCursor:true});
     t.on('pointerdown',(_p,_x,_y,event)=>{event.stopPropagation(); action();}); return t;
   }
   showMenu() { this.overlay('THÁP CỦ ẤU','Trâu chở được 24 củ ấu.\nBạn xếp được bao nhiêu?','Bắt đầu',()=>this.start()); }
   overlay(title,description,label,action) {
     this.panel=this.add.container(0,0).setScrollFactor(0).setDepth(40);
     const bg=this.add.rectangle(W/2,H/2,W,H,0xffedba,.94);
-    const heading=this.add.text(W/2,186,title,{fontFamily:'Arial',fontSize:'31px',fontStyle:'bold',color:'#38634c'}).setOrigin(.5);
-    const text=this.add.text(W/2,266,description,{fontFamily:'Arial',fontSize:'18px',color:'#55462e',align:'center',lineSpacing:9}).setOrigin(.5);
+    const heading=this.add.text(W/2,186,title,{fontFamily:'Arial',fontSize:'31px',fontStyle:'bold',color:'#38634c'}).setResolution(TEXT_RESOLUTION).setOrigin(.5);
+    const text=this.add.text(W/2,266,description,{fontFamily:'Arial',fontSize:'18px',color:'#55462e',align:'center',lineSpacing:9}).setResolution(TEXT_RESOLUTION).setOrigin(.5);
     const b=this.button(W/2,365,label,action);
-    const help=this.add.text(W/2,445,'Chạm để thả • Xếp thật khéo!\nRơi 3 củ là hết lượt',{fontSize:'15px',color:'#6a623f',align:'center',lineSpacing:9}).setOrigin(.5);
+    const help=this.add.text(W/2,445,'Chạm để thả • Xếp thật khéo!\nRơi 3 củ là hết lượt',{fontSize:'15px',color:'#6a623f',align:'center',lineSpacing:9}).setResolution(TEXT_RESOLUTION).setOrigin(.5);
     this.panel.add([bg,heading,text,b,help]);
   }
   start() {
     if(this.panel) this.panel.destroy();
     for(const n of this.nuts) n.destroy(); this.nuts=[];
-    this.cameras.main.setScroll(0,0); this.score=0; this.lives=3; this.waiting=false; this.mode='play'; this.bubble.setText('').setVisible(false); this.targetScroll=0;
+    this.cameras.main.setScroll(0,0); this.score=0; this.lives=3; this.mode='play'; this.bubble.setText('').setVisible(false); this.targetScroll=0;
     this.unlockAudio(); this.spawn(); this.updateHud();
   }
   unlockAudio() { if(!this.audio) { const Audio=window.AudioContext||window.webkitAudioContext; if(Audio) this.audio=new Audio(); } if(this.audio?.state==='suspended') this.audio.resume(); }
   beep(f=400,d=.08) { if(!this.soundOn||!this.audio) return; const o=this.audio.createOscillator(),g=this.audio.createGain(); o.type='triangle'; o.frequency.setValueAtTime(f,this.audio.currentTime); o.frequency.exponentialRampToValueAtTime(f/2,this.audio.currentTime+d); g.gain.setValueAtTime(.08,this.audio.currentTime); g.gain.exponentialRampToValueAtTime(.001,this.audio.currentTime+d); o.connect(g);g.connect(this.audio.destination);o.start();o.stop(this.audio.currentTime+d); }
-  spawn() { if(this.mode!=='play')return; this.waiting=false; this.phase=0; this.active=this.add.image(223,this.cameras.main.scrollY+130,'nut').setDepth(5); }
+  spawn() {
+    if(this.mode!=='play') return;
+    this.direction = Phaser.Math.Between(0, 1) ? 1 : -1;
+    const x = Phaser.Math.FloatBetween(DROP_LEFT, DROP_RIGHT);
+    this.active = this.add.image(x, this.cameras.main.scrollY + 130, 'nut').setDepth(5);
+  }
   drop() {
-    const {x,y}=this.active; this.active.destroy(); this.active=null; this.waiting=true;
+    if(this.mode!=='play' || !this.active) return;
+    const {x,y}=this.active; this.active.destroy(); this.active=null;
     const B=Phaser.Physics.Matter.Matter.Bodies;
     const parts=[B.rectangle(x,y+8,30,20,{chamfer:{radius:7}}),B.rectangle(x-17,y-3,9,27,{angle:-.38,chamfer:{radius:3}}),B.rectangle(x+17,y-3,9,27,{angle:.38,chamfer:{radius:3}})];
     const body=Phaser.Physics.Matter.Matter.Body.create({parts,friction:.75,frictionStatic:1,restitution:.05,density:.003,frictionAir:.015});
-    const n=this.matter.add.image(x,y,'nut').setExistingBody(body).setOrigin(.5, .56).setDepth(4); n.born=this.time.now; n.stable=0;n.counted=false;n.lost=false;n.turnDone=false;
-    this.nuts.push(n); this.current=n; this.beep(500);
+    const n=this.matter.add.image(x,y,'nut').setExistingBody(body).setOrigin(.5, .56).setDepth(4); n.born=this.time.now; n.stable=0;n.counted=false;n.lost=false;
+    this.nuts.push(n); this.beep(500); this.spawn();
   }
   updateHud() { this.hud.setText(`Củ: ${this.score}   Kỷ lục: ${this.best}\nMạng: ${'♥'.repeat(this.lives)}${'♡'.repeat(3-this.lives)}`); }
   lose(n) {
@@ -95,7 +103,13 @@ class Tower extends Phaser.Scene {
   update(_time,delta) {
     if(this.mode!=='play')return;
     const dt=Math.min(delta,50);
-    if(this.active) {this.phase+=dt*(.0015+Math.min(this.score,40)*.000045);this.active.x=223+Math.sin(this.phase)*104;this.active.y=this.cameras.main.scrollY+130;}
+    if(this.active) {
+      const speed = 145 + Math.min(this.nuts.length, 40) * 4;
+      this.active.x += this.direction * speed * dt / 1000;
+      if(this.active.x > DROP_RIGHT) { this.active.x = 2 * DROP_RIGHT - this.active.x; this.direction = -1; }
+      if(this.active.x < DROP_LEFT) { this.active.x = 2 * DROP_LEFT - this.active.x; this.direction = 1; }
+      this.active.y = this.cameras.main.scrollY + 130;
+    }
     let top=DECK;
     for(const n of this.nuts) {
       if(n.lost)continue;
@@ -104,12 +118,10 @@ class Tower extends Phaser.Scene {
       if(!n.counted && n.stable>650 && n.y<DECK) this.scoreNut(n);
       if(n.counted && n.y<DECK)top=Math.min(top,n.y-25);
     }
-    const n=this.current;
-    if(this.waiting && n && !n.turnDone && (n.counted||n.lost||this.time.now-n.born>6000)) {n.turnDone=true;this.spawn();}
     this.targetScroll=Math.min(0,top-265);
     this.cameras.main.scrollY=Phaser.Math.Linear(this.cameras.main.scrollY,this.targetScroll,.045);
   }
 }
-export const game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#ffedba',scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},physics:{default:'matter',matter:{enableSleeping:true}},scene:Tower});
+export const game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#ffedba',scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.NO_CENTER},physics:{default:'matter',matter:{enableSleeping:true}},scene:Tower});
 // Development-only inspection for browser smoke checks; stripped from production.
 if (import.meta.env.DEV) window.__towerGame = game;
