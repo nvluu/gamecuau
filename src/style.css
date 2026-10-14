@@ -58,3 +58,16 @@ canvas { display: block; touch-action: none; }
 #start-button:disabled { opacity: .6; cursor: wait; }
 #start-button:hover:not(:disabled) { background: #294f3b; }
 #start-button:focus-visible { outline: 3px solid #b88243; outline-offset: 4px; }
+#intro[hidden] { display: none; }
+#intro-result {
+  margin: 0;
+  flex-shrink: 0;
+  color: #38634c;
+  font-size: clamp(13px, 4.5cqw, 26px);
+  line-height: 1.4;
+  font-weight: bold;
+  text-align: center;
+  white-space: pre-line;
+}
+#intro-result[hidden] { display: none; }
+#intro:has(#intro-result:not([hidden])) .intro-video { height: 60%; }

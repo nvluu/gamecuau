@@ -22,7 +22,7 @@ Bản xuất tĩnh nằm trong `dist/`. `base: './'` hỗ trợ đường dẫn 
 
 ## Cách chơi
 
-Bấm **Bắt đầu**, chạm vùng chơi dưới thanh điểm hoặc nhấp chuột để thả củ đang di chuyển. Củ đứng ổn định được tính một điểm; củ tiếp theo xuất hiện ngay sau mỗi lần thả, ở vị trí ngang và hướng di chuyển ngẫu nhiên. Mỗi củ rơi khỏi xe xuống dưới vùng chơi mất một mạng, kể cả củ đã ghi điểm. Mất ba mạng kết thúc lượt. Điểm là số củ đã xếp thành công trong lượt; củ rơi sau đó không trừ điểm đã ghi.
+Bấm **Bắt đầu**, chạm vùng chơi dưới thanh điểm hoặc nhấp chuột để thả củ đang di chuyển. Củ đứng ổn định được tính một điểm; củ tiếp theo xuất hiện ngay sau mỗi lần thả, ở vị trí ngang và hướng di chuyển ngẫu nhiên. Mỗi củ rơi khỏi xe xuống dưới vùng chơi mất một mạng, kể cả củ đã ghi điểm. Mất ba mạng kết thúc lượt và quay ngay về màn hình đầu, hiển thị số củ vừa xếp và kỷ lục. Bấm Bắt đầu để chơi lượt mới. Điểm là số củ đã xếp thành công trong lượt; củ rơi sau đó không trừ điểm đã ghi.
 
 Camera đi lên theo tháp. Tốc độ di chuyển tăng theo số củ đã thả. Màn hình đầu nhúng video YouTube và có nút Bắt đầu; game không có nút âm thanh. Kỷ lục lưu bằng localStorage; nếu trình duyệt chặn lưu trữ, game vẫn chơi được. Không có quay chậm hoặc chia sẻ điểm.
 

@@ -53,28 +53,25 @@ class Tower extends Phaser.Scene {
     this.time.addEvent({delay:2900,loop:true,callback:()=>this.tweens.add({targets:this.eye,scaleY:.1,duration:100,yoyo:true})});
     this.bubble=this.add.text(77,461,'',{fontSize:'13px',color:'#31473a',backgroundColor:'#fff7d8',padding:{x:8,y:6}}).setResolution(TEXT_RESOLUTION).setDepth(10).setVisible(false);
   }
-  button(x,y,label,action,width=220,height=45) {
-    const t=this.add.text(x,y,label,{fontFamily:'Arial',fontSize:'20px',fontStyle:'bold',color:'#fff9df',backgroundColor:'#38634c',fixedWidth:width,fixedHeight:height,align:'center',padding:{top:10}}).setResolution(TEXT_RESOLUTION).setOrigin(.5).setInteractive({useHandCursor:true});
-    t.on('pointerdown',(_p,_x,_y,event)=>{event.stopPropagation(); action();}); return t;
-  }
-  showMenu() {
+  showMenu(finished = false) {
+    this.mode = 'menu';
+    const intro = document.getElementById('intro');
+    const result = document.getElementById('intro-result');
+    result.hidden = !finished;
+    result.textContent = finished ? `Bạn xếp được ${this.score} củ ấu\nKỷ lục: ${this.best} củ` : '';
+    intro.hidden = false;
+    const video = intro.querySelector('iframe');
+    if (!video.hasAttribute('src')) video.src = video.dataset.videoSrc;
     const button = document.getElementById('start-button');
     button.disabled = false;
     button.addEventListener('click', () => this.start(), { once: true });
   }
-  overlay(title,description,label,action) {
-    this.panel=this.add.container(0,0).setScrollFactor(0).setDepth(40);
-    const bg=this.add.rectangle(W/2,H/2,W,H,0xffedba,.94);
-    const heading=this.add.text(W/2,186,title,{fontFamily:'Arial',fontSize:'31px',fontStyle:'bold',color:'#38634c'}).setResolution(TEXT_RESOLUTION).setOrigin(.5);
-    const text=this.add.text(W/2,266,description,{fontFamily:'Arial',fontSize:'18px',color:'#55462e',align:'center',lineSpacing:9}).setResolution(TEXT_RESOLUTION).setOrigin(.5);
-    const b=this.button(W/2,365,label,action);
-    const help=this.add.text(W/2,445,'Chạm để thả • Xếp thật khéo!\nRơi 3 củ là hết lượt',{fontSize:'15px',color:'#6a623f',align:'center',lineSpacing:9}).setResolution(TEXT_RESOLUTION).setOrigin(.5);
-    this.panel.add([bg,heading,text,b,help]);
-  }
   start() {
-    // Removing the player also stops video audio before gameplay starts.
-    document.getElementById('intro')?.remove();
-    if(this.panel) this.panel.destroy();
+    // Unloading the player stops video audio; retain the menu for the next round.
+    const intro = document.getElementById('intro');
+    intro.hidden = true;
+    intro.querySelector('iframe').removeAttribute('src');
+    if(this.active) { this.active.destroy(); this.active = null; }
     for(const n of this.nuts) n.destroy(); this.nuts=[];
     this.cameras.main.setScroll(0,0); this.score=0; this.lives=3; this.mode='play'; this.bubble.setText('').setVisible(false); this.targetScroll=0;
     this.unlockAudio(); this.spawn(); this.updateHud();
@@ -99,7 +96,10 @@ class Tower extends Phaser.Scene {
   updateHud() { this.hud.setText(`Củ: ${this.score}   Kỷ lục: ${this.best}\nMạng: ${'♥'.repeat(this.lives)}${'♡'.repeat(3-this.lives)}`); }
   lose(n) {
     n.lost=true; this.lives=Math.max(0,this.lives-1); this.beep(150,.2); this.updateHud();
-    if(this.lives===0) {this.mode='over'; if(this.active){this.active.destroy();this.active=null;} this.time.delayedCall(450,()=>this.overlay('THÁP ĐỔ RỒI!',`Bạn xếp được ${this.score} củ ấu\nKỷ lục: ${this.best} củ`,'Chơi lại',()=>this.start()));}
+    if(this.lives===0) {
+      if(this.active) { this.active.destroy(); this.active=null; }
+      this.showMenu(true);
+    }
   }
   scoreNut(n) {
     n.counted=true; this.score++; this.best=Math.max(this.best,this.score); try{localStorage.setItem('cu-au-best',String(this.best));}catch{}
