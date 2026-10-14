@@ -16,7 +16,6 @@ class Tower extends Phaser.Scene {
     this.matter.world.setGravity(0, 1.15);
     this.matter.add.rectangle(223, DECK, 188, 18, { isStatic: true, friction: .85, label: 'cart' });
     this.hud = this.add.text(16, 19, '', {fontFamily:'Arial',fontSize:'16px',color:'#263d32',fontStyle:'bold'}).setResolution(TEXT_RESOLUTION).setScrollFactor(0).setDepth(20);
-    this.mute = this.button(316, 33, '♪', () => { this.soundOn = !this.soundOn; this.mute.setText(this.soundOn ? '♪' : '×♪'); }, 44, 34).setScrollFactor(0).setDepth(30);
     this.input.on('pointerdown', pointer => { if (this.mode === 'play' && pointer.y / RENDER_SCALE > 65 && this.active) this.drop(); });
     this.events.on('shutdown', () => { if (this.audio) this.audio.close(); });
     this.showMenu();
@@ -58,7 +57,11 @@ class Tower extends Phaser.Scene {
     const t=this.add.text(x,y,label,{fontFamily:'Arial',fontSize:'20px',fontStyle:'bold',color:'#fff9df',backgroundColor:'#38634c',fixedWidth:width,fixedHeight:height,align:'center',padding:{top:10}}).setResolution(TEXT_RESOLUTION).setOrigin(.5).setInteractive({useHandCursor:true});
     t.on('pointerdown',(_p,_x,_y,event)=>{event.stopPropagation(); action();}); return t;
   }
-  showMenu() { this.overlay('THÁP CỦ ẤU','Trâu chở được 24 củ ấu.\nBạn xếp được bao nhiêu?','Bắt đầu',()=>this.start()); }
+  showMenu() {
+    const button = document.getElementById('start-button');
+    button.disabled = false;
+    button.addEventListener('click', () => this.start(), { once: true });
+  }
   overlay(title,description,label,action) {
     this.panel=this.add.container(0,0).setScrollFactor(0).setDepth(40);
     const bg=this.add.rectangle(W/2,H/2,W,H,0xffedba,.94);
@@ -69,6 +72,8 @@ class Tower extends Phaser.Scene {
     this.panel.add([bg,heading,text,b,help]);
   }
   start() {
+    // Removing the player also stops video audio before gameplay starts.
+    document.getElementById('intro')?.remove();
     if(this.panel) this.panel.destroy();
     for(const n of this.nuts) n.destroy(); this.nuts=[];
     this.cameras.main.setScroll(0,0); this.score=0; this.lives=3; this.mode='play'; this.bubble.setText('').setVisible(false); this.targetScroll=0;
