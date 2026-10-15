@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="104" height="96" viewBox="0 0 104 96">
+<defs>
+ <linearGradient id="shell" x1=".15" y1="0" x2=".75" y2="1"><stop stop-color="#71634c"/><stop offset=".38" stop-color="#443e32"/><stop offset="1" stop-color="#211f1b"/></linearGradient>
+ <linearGradient id="facet" x2=".8" y2="1"><stop stop-color="#82715a"/><stop offset="1" stop-color="#403a2e"/></linearGradient>
+ <pattern id="pores" width="12" height="13" patternUnits="userSpaceOnUse"><circle cx="3" cy="5" r="1.1" fill="#151611" opacity=".48"/><path d="m8 9 2-1M2 11l2 1" stroke="#b2a27d" stroke-width=".7" opacity=".32"/></pattern>
+ <clipPath id="shape"><path d="M5 11Q25 20 48 28Q73 25 99 14Q89 35 85 49Q75 69 54 85Q31 79 21 59Q16 37 5 11Z"/></clipPath>
+</defs>
+<path d="M5 11Q25 20 48 28Q73 25 99 14Q89 35 85 49Q75 69 54 85Q31 79 21 59Q16 37 5 11Z" fill="url(#shell)" stroke="#25251e" stroke-width="2" stroke-linejoin="round"/>
+<path d="M8 14 48 30 52 69 26 58Q19 35 8 14Z" fill="url(#facet)" opacity=".8"/>
+<path d="m48 30 48-14-28 29-16 24Z" fill="#73664d" opacity=".33"/>
+<path d="m26 58 26 11 28-15-26 29Z" fill="#1e201b" opacity=".65"/>
+<g clip-path="url(#shape)"><rect width="104" height="96" fill="url(#pores)"/></g>
+<path d="m16 22 30 12 6 33m-24-9 24 11 23-15" fill="none" stroke="#a18d66" stroke-width="1.3" opacity=".48"/>
+<path d="m48 39 5 5-3 10-6-5Z" fill="#292a23"/><path d="m48 39 5 5-1 4" fill="none" stroke="#a18a65" stroke-width="1.5"/>
+<path d="m34 43 3 4m24 13 3-4m-25 9 3 2m27-32 3-2" stroke="#181d18" stroke-width="2" opacity=".7"/>
+</svg>

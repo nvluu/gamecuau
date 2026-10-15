@@ -6,6 +6,9 @@ import '@fontsource/noto-sans/vietnamese-700.css';
 import '@fontsource/noto-sans/latin-800.css';
 import '@fontsource/noto-sans/vietnamese-800.css';
 import './style.css';
+import nutArt from './assets/nut.svg?url&no-inline';
+import buffaloArt from './assets/buffalo.svg?url&no-inline';
+import cartArt from './assets/cart.svg?url&no-inline';
 
 const W = 360, H = 640, DECK = 533;
 const TEXT_RESOLUTION = Math.min(4, Math.max(2, window.devicePixelRatio * Math.min(window.innerWidth / W, window.innerHeight / H)));
@@ -14,10 +17,15 @@ const DROP_LEFT = 36, DROP_RIGHT = W - 36;
 const readBest = () => { try { return Number(localStorage.getItem('cu-au-best')) || 0; } catch { return 0; } };
 class Tower extends Phaser.Scene {
   constructor() { super('Tower'); }
+  preload() {
+    this.load.svg('nut', nutArt, { width: 208, height: 192 });
+    this.load.svg('buffalo', buffaloArt, { width: 420, height: 396 });
+    this.load.svg('cart', cartArt, { width: 660, height: 270 });
+  }
   create() {
     this.cameras.main.setOrigin(0, 0).setZoom(RENDER_SCALE);
     this.best = readBest(); this.soundOn = true; this.mode = 'menu'; this.nuts = [];
-    this.drawWorld(); this.makeTextures(); this.makeBuffalo();
+    this.drawWorld(); this.makeBuffalo();
     this.matter.world.setBounds(-500, -20000, 1360, 21000, 32, false, false, false, false);
     this.matter.world.setGravity(0, 1.15);
     this.matter.add.rectangle(223, DECK, 188, 18, { isStatic: true, friction: .85, label: 'cart' });
@@ -35,28 +43,24 @@ class Tower extends Phaser.Scene {
     g.fillStyle(0xe8b83e).fillRect(0, 430, W, 210);
     for (let x=3; x<W; x+=14) { g.lineStyle(2,0xaf942d,.6); g.lineBetween(x,505,x+5,461); g.fillStyle(0xffdf6b); g.fillEllipse(x+5,461,5,15); }
     g.fillStyle(0x9d7138).fillRect(0,580,W,60);
-    g.fillStyle(0x75512d).fillRoundedRect(124,527,198,20,5);
-    g.fillStyle(0xb88243).fillRect(130,529,187,7);
-    g.lineStyle(4,0x66442c); g.lineBetween(125,551,75,546);
-    for(const x of [153,287]) { g.fillStyle(0x513e2e).fillCircle(x,566,17); g.fillStyle(0xdab578).fillCircle(x,566,10); g.lineStyle(2,0x684b31); g.strokeCircle(x,566,10); }
-  }
-  makeTextures() {
-    if(this.textures.exists('nut')) return;
-    const g=this.make.graphics({x:0,y:0,add:false});
-    g.fillStyle(0x54312b); g.beginPath(); g.moveTo(5,7); g.lineTo(14,28); g.lineTo(26,34); g.lineTo(38,28); g.lineTo(47,7); g.lineTo(44,34); g.lineTo(35,43); g.lineTo(18,43); g.lineTo(8,34); g.closePath(); g.fillPath();
-    g.fillStyle(0x794738); g.fillEllipse(26,32,27,24); g.lineStyle(2,0xb1724c); g.lineBetween(17,29,24,25); g.lineBetween(28,25,35,29);
-    g.generateTexture('nut',52,48); g.destroy();
+    // Twin wooden shafts attach the cart to the buffalo's yoke.
+    g.lineStyle(5, 0x57432d); g.lineBetween(70, 524, 144, 543);
+    g.lineStyle(2, 0xb79a66); g.lineBetween(70, 522, 145, 541);
+    g.lineStyle(4, 0x80623c); g.lineBetween(67, 531, 132, 550);
+    this.add.image(119, 514, 'cart').setOrigin(0).setDisplaySize(220, 90);
   }
   makeBuffalo() {
-    this.buffalo=this.add.container(63,526);
-    const g=this.add.graphics(); g.fillStyle(0x62716e); g.fillEllipse(0,0,68,43); g.fillRoundedRect(-25,10,10,36,4); g.fillRoundedRect(15,10,10,36,4); g.fillEllipse(-23,-14,38,42);
-    g.lineStyle(6,0xe8e0be); g.beginPath(); g.moveTo(-36,-25); g.lineTo(-46,-35); g.lineTo(-45,-45); g.strokePath(); g.beginPath(); g.moveTo(-11,-25); g.lineTo(-3,-37); g.lineTo(-5,-46); g.strokePath();
-    g.fillStyle(0x89968b); g.fillEllipse(-27,-3,31,18); g.fillStyle(0x384b43); g.fillCircle(-34,-3,2); g.fillCircle(-23,-3,2);
-    this.eye=this.add.ellipse(-29,-20,5,6,0x1e302b);
-    this.tail=this.add.graphics(); this.tail.lineStyle(3,0x4e625b); this.tail.lineBetween(29,-5,40,14); this.tail.fillStyle(0x354a42); this.tail.fillEllipse(40,16,7,12);
-    this.buffalo.add([g,this.eye,this.tail]);
-    this.tweens.add({targets:this.tail,angle:18,duration:650,yoyo:true,repeat:-1});
-    this.time.addEvent({delay:2900,loop:true,callback:()=>this.tweens.add({targets:this.eye,scaleY:.1,duration:100,yoyo:true})});
+    this.buffalo = this.add.container(63, 526);
+    const body = this.add.image(-55, -64, 'buffalo').setOrigin(0).setDisplaySize(126, 119);
+    this.eye = this.add.ellipse(-26, -3, 3.5, 2.5, 0x17251d);
+    const glint = this.add.ellipse(-26.5, -3.5, .9, .9, 0xd4d1b5);
+    this.tail = this.add.graphics({ x: 62, y: -22 });
+    this.tail.lineStyle(2, 0x343d32);
+    this.tail.beginPath(); this.tail.moveTo(0, 0); this.tail.lineTo(5, 13); this.tail.lineTo(2, 30); this.tail.strokePath();
+    this.tail.fillStyle(0x252e27); this.tail.fillEllipse(2, 31, 4, 9);
+    this.buffalo.add([this.tail, body, this.eye, glint]);
+    this.tweens.add({targets:this.tail, angle:18, duration:850, yoyo:true, repeat:-1});
+    this.time.addEvent({delay:2900, loop:true, callback:()=>this.tweens.add({targets:[this.eye, glint], scaleY:.1, duration:100, yoyo:true})});
     this.bubble=this.add.text(77,461,'',{fontFamily:'Noto Sans',fontSize:'13px',color:'#31473a',backgroundColor:'#fff7d8',padding:{x:8,y:6}}).setResolution(TEXT_RESOLUTION).setDepth(10).setVisible(false);
   }
   showMenu(finished = false) {
@@ -88,15 +92,15 @@ class Tower extends Phaser.Scene {
     if(this.mode!=='play') return;
     this.direction = Phaser.Math.Between(0, 1) ? 1 : -1;
     const x = Phaser.Math.FloatBetween(DROP_LEFT, DROP_RIGHT);
-    this.active = this.add.image(x, this.cameras.main.scrollY + 130, 'nut').setDepth(5);
+    this.active = this.add.image(x, this.cameras.main.scrollY + 130, 'nut').setDisplaySize(52, 48).setDepth(5);
   }
   drop() {
     if(this.mode!=='play' || !this.active) return;
     const {x,y}=this.active; this.active.destroy(); this.active=null;
     const B=Phaser.Physics.Matter.Matter.Bodies;
-    const parts=[B.rectangle(x,y+8,30,20,{chamfer:{radius:7}}),B.rectangle(x-17,y-3,9,27,{angle:-.38,chamfer:{radius:3}}),B.rectangle(x+17,y-3,9,27,{angle:.38,chamfer:{radius:3}})];
+    const parts=[B.rectangle(x,y+6,29,23,{chamfer:{radius:6}}),B.rectangle(x-16,y-7,25,8,{angle:.72,chamfer:{radius:2}}),B.rectangle(x+16,y-7,25,8,{angle:-.72,chamfer:{radius:2}})];
     const body=Phaser.Physics.Matter.Matter.Body.create({parts,friction:.75,frictionStatic:1,restitution:.05,density:.003,frictionAir:.015});
-    const n=this.matter.add.image(x,y,'nut').setExistingBody(body).setOrigin(.5, .56).setDepth(4); n.born=this.time.now; n.stable=0;n.counted=false;n.lost=false;
+    const n=this.matter.add.image(x,y,'nut').setDisplaySize(52, 48).setExistingBody(body).setOrigin(.5, .56).setDepth(4); n.born=this.time.now; n.stable=0;n.counted=false;n.lost=false;
     this.nuts.push(n); this.beep(500); this.spawn();
   }
   updateHud() { this.hud.setText(`Củ: ${this.score}   Kỷ lục: ${this.best}\nMạng: ${'♥'.repeat(this.lives)}${'♡'.repeat(3-this.lives)}`); }
