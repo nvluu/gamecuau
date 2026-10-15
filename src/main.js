@@ -1,4 +1,10 @@
 import Phaser from 'phaser';
+import '@fontsource/noto-sans/latin-400.css';
+import '@fontsource/noto-sans/vietnamese-400.css';
+import '@fontsource/noto-sans/latin-700.css';
+import '@fontsource/noto-sans/vietnamese-700.css';
+import '@fontsource/noto-sans/latin-800.css';
+import '@fontsource/noto-sans/vietnamese-800.css';
 import './style.css';
 
 const W = 360, H = 640, DECK = 533;
@@ -15,7 +21,7 @@ class Tower extends Phaser.Scene {
     this.matter.world.setBounds(-500, -20000, 1360, 21000, 32, false, false, false, false);
     this.matter.world.setGravity(0, 1.15);
     this.matter.add.rectangle(223, DECK, 188, 18, { isStatic: true, friction: .85, label: 'cart' });
-    this.hud = this.add.text(16, 19, '', {fontFamily:'Arial',fontSize:'16px',color:'#263d32',fontStyle:'bold'}).setResolution(TEXT_RESOLUTION).setScrollFactor(0).setDepth(20);
+    this.hud = this.add.text(16, 19, '', {fontFamily:'Noto Sans',fontSize:'16px',color:'#263d32',fontStyle:'bold'}).setResolution(TEXT_RESOLUTION).setScrollFactor(0).setDepth(20);
     this.input.on('pointerdown', pointer => { if (this.mode === 'play' && pointer.y / RENDER_SCALE > 65 && this.active) this.drop(); });
     this.events.on('shutdown', () => { if (this.audio) this.audio.close(); });
     this.showMenu();
@@ -51,7 +57,7 @@ class Tower extends Phaser.Scene {
     this.buffalo.add([g,this.eye,this.tail]);
     this.tweens.add({targets:this.tail,angle:18,duration:650,yoyo:true,repeat:-1});
     this.time.addEvent({delay:2900,loop:true,callback:()=>this.tweens.add({targets:this.eye,scaleY:.1,duration:100,yoyo:true})});
-    this.bubble=this.add.text(77,461,'',{fontSize:'13px',color:'#31473a',backgroundColor:'#fff7d8',padding:{x:8,y:6}}).setResolution(TEXT_RESOLUTION).setDepth(10).setVisible(false);
+    this.bubble=this.add.text(77,461,'',{fontFamily:'Noto Sans',fontSize:'13px',color:'#31473a',backgroundColor:'#fff7d8',padding:{x:8,y:6}}).setResolution(TEXT_RESOLUTION).setDepth(10).setVisible(false);
   }
   showMenu(finished = false) {
     this.mode = 'menu';
@@ -129,6 +135,15 @@ class Tower extends Phaser.Scene {
     this.cameras.main.scrollY=Phaser.Math.Linear(this.cameras.main.scrollY,this.targetScroll,.045);
   }
 }
-export const game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W * RENDER_SCALE,height:H * RENDER_SCALE,backgroundColor:'#ffedba',scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.NO_CENTER},physics:{default:'matter',matter:{enableSleeping:true}},scene:Tower});
+export let game;
+async function boot() {
+  // Canvas text must be created after the Vietnamese glyphs are available.
+  await Promise.all([400, 700, 800].map(weight =>
+    document.fonts.load(`${weight} 16px "Noto Sans"`, 'THỬ THÁCH CỦ ẤU Kỷ lục Bạn xếp được')
+  ));
+  game = new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W * RENDER_SCALE,height:H * RENDER_SCALE,backgroundColor:'#ffedba',scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.NO_CENTER},physics:{default:'matter',matter:{enableSleeping:true}},scene:Tower});
 // Development-only inspection for browser smoke checks; stripped from production.
 if (import.meta.env.DEV) window.__towerGame = game;
+
+}
+boot();

@@ -1,6 +1,6 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #293c32; }
-body { font-family: Arial, sans-serif; }
+body { font-family: "Noto Sans", sans-serif; font-synthesis: none; }
 /* CSS alone centers the frame; Phaser must not add another centering margin. */
 #game {
   position: fixed;
@@ -30,6 +30,7 @@ canvas { display: block; touch-action: none; }
   color: #38634c;
   font-size: clamp(16px, 7cqw, 42px);
   font-weight: 800;
+  line-height: 1.45;
   text-align: center;
 }
 .intro-video {
@@ -51,7 +52,7 @@ canvas { display: block; touch-action: none; }
   border-radius: 8px;
   color: #fff9df;
   background: #38634c;
-  font: bold clamp(16px, 5.5cqw, 32px) Arial, sans-serif;
+  font: bold clamp(16px, 5.5cqw, 32px) "Noto Sans", sans-serif;
   cursor: pointer;
   touch-action: manipulation;
 }

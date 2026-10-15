@@ -42,3 +42,5 @@ Không cần secret riêng. Chưa có deployment nào được thực hiện ch�
 - `.github/workflows/pages.yml`: build và triển khai Pages.
 
 MVP dùng thân và hai sừng ghép thành vật thể vật lý để giữ nhận diện củ ấu. Đây là xấp xỉ va chạm, chưa phải đường cong chi tiết. Có thể tinh chỉnh ma sát, tốc độ và thời gian ổn định trong scene sau các lượt chơi thử.
+
+Phông Noto Sans được đóng gói cùng game (Latin và tiếng Việt, trọng lượng 400/700/800), không phụ thuộc Google Fonts hoặc phông cài trên máy. Canvas đợi tải phông trước khi tạo chữ.
