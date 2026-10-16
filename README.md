@@ -37,11 +37,11 @@ Không cần secret riêng. Chưa có deployment nào được thực hiện ch�
 ## Cấu trúc
 
 - `src/main.js`: scene, vật lý, vòng chơi, UI và âm thanh.
-- `src/assets/`: SVG tự vẽ của củ ấu, trâu và xe gỗ; raster hóa ở độ phân giải cao khi nạp, không tải ảnh từ bên ngoài.
+- `src/assets/`: ảnh PNG trong suốt do người dùng cung cấp (`ca1png.png`: củ ấu, `ca2png.png`: trâu) và xe gỗ SVG. Ảnh giữ nguyên tỷ lệ, được đóng gói cùng game.
 - `src/style.css`: khung hiển thị và hỗ trợ cảm ứng.
 - `vite.config.js`: cấu hình build tĩnh.
 - `.github/workflows/pages.yml`: build và triển khai Pages.
 
-MVP dùng thân và hai sừng ngang ghép thành vật thể vật lý để giữ nhận diện củ ấu. Đây là xấp xỉ va chạm, chưa phải đường cong chi tiết. Có thể tinh chỉnh ma sát, tốc độ và thời gian ổn định trong scene sau các lượt chơi thử.
+Củ ấu dùng đa giác lồi bám theo hai sừng nghiêng và đáy ảnh; tâm ảnh được căn với tâm vật lý để không bị nhảy vị trí khi thả. Đây là xấp xỉ va chạm. Có thể tinh chỉnh ma sát, tốc độ và thời gian ổn định trong scene sau các lượt chơi thử.
 
 Phông Noto Sans được đóng gói cùng game (Latin và tiếng Việt, trọng lượng 400/700/800), không phụ thuộc Google Fonts hoặc phông cài trên máy. Canvas đợi tải phông trước khi tạo chữ.

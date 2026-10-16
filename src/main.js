@@ -6,20 +6,21 @@ import '@fontsource/noto-sans/vietnamese-700.css';
 import '@fontsource/noto-sans/latin-800.css';
 import '@fontsource/noto-sans/vietnamese-800.css';
 import './style.css';
-import nutArt from './assets/nut.svg?url&no-inline';
-import buffaloArt from './assets/buffalo.svg?url&no-inline';
+import nutArt from './assets/ca1png.png?url&no-inline';
+import buffaloArt from './assets/ca2png.png?url&no-inline';
 import cartArt from './assets/cart.svg?url&no-inline';
 
 const W = 360, H = 640, DECK = 533;
 const TEXT_RESOLUTION = Math.min(4, Math.max(2, window.devicePixelRatio * Math.min(window.innerWidth / W, window.innerHeight / H)));
 const RENDER_SCALE = Math.ceil(TEXT_RESOLUTION);
+const NUT_WIDTH = 52, NUT_HEIGHT = NUT_WIDTH * 533 / 800;
 const DROP_LEFT = 36, DROP_RIGHT = W - 36;
 const readBest = () => { try { return Number(localStorage.getItem('cu-au-best')) || 0; } catch { return 0; } };
 class Tower extends Phaser.Scene {
   constructor() { super('Tower'); }
   preload() {
-    this.load.svg('nut', nutArt, { width: 208, height: 192 });
-    this.load.svg('buffalo', buffaloArt, { width: 420, height: 396 });
+    this.load.image('nut', nutArt);
+    this.load.image('buffalo', buffaloArt);
     this.load.svg('cart', cartArt, { width: 660, height: 270 });
   }
   create() {
@@ -51,16 +52,8 @@ class Tower extends Phaser.Scene {
   }
   makeBuffalo() {
     this.buffalo = this.add.container(63, 526);
-    const body = this.add.image(-55, -64, 'buffalo').setOrigin(0).setDisplaySize(126, 119);
-    this.eye = this.add.ellipse(-26, -3, 3.5, 2.5, 0x17251d);
-    const glint = this.add.ellipse(-26.5, -3.5, .9, .9, 0xd4d1b5);
-    this.tail = this.add.graphics({ x: 62, y: -22 });
-    this.tail.lineStyle(2, 0x343d32);
-    this.tail.beginPath(); this.tail.moveTo(0, 0); this.tail.lineTo(5, 13); this.tail.lineTo(2, 30); this.tail.strokePath();
-    this.tail.fillStyle(0x252e27); this.tail.fillEllipse(2, 31, 4, 9);
-    this.buffalo.add([this.tail, body, this.eye, glint]);
-    this.tweens.add({targets:this.tail, angle:18, duration:850, yoyo:true, repeat:-1});
-    this.time.addEvent({delay:2900, loop:true, callback:()=>this.tweens.add({targets:[this.eye, glint], scaleY:.1, duration:100, yoyo:true})});
+    const body = this.add.image(-55, -30, 'buffalo').setOrigin(0).setDisplaySize(126, 126 * 533 / 800);
+    this.buffalo.add(body);
     this.bubble=this.add.text(77,461,'',{fontFamily:'Noto Sans',fontSize:'13px',color:'#31473a',backgroundColor:'#fff7d8',padding:{x:8,y:6}}).setResolution(TEXT_RESOLUTION).setDepth(10).setVisible(false);
   }
   showMenu(finished = false) {
@@ -92,15 +85,21 @@ class Tower extends Phaser.Scene {
     if(this.mode!=='play') return;
     this.direction = Phaser.Math.Between(0, 1) ? 1 : -1;
     const x = Phaser.Math.FloatBetween(DROP_LEFT, DROP_RIGHT);
-    this.active = this.add.image(x, this.cameras.main.scrollY + 130, 'nut').setDisplaySize(52, 48).setDepth(5);
+    this.active = this.add.image(x, this.cameras.main.scrollY + 130, 'nut').setDisplaySize(NUT_WIDTH, NUT_HEIGHT).setDepth(5);
   }
   drop() {
     if(this.mode!=='play' || !this.active) return;
     const {x,y}=this.active; this.active.destroy(); this.active=null;
-    const B=Phaser.Physics.Matter.Matter.Bodies;
-    const parts=[B.rectangle(x,y+6,29,23,{chamfer:{radius:6}}),B.rectangle(x-16,y-7,25,8,{angle:.72,chamfer:{radius:2}}),B.rectangle(x+16,y-7,25,8,{angle:-.72,chamfer:{radius:2}})];
-    const body=Phaser.Physics.Matter.Matter.Body.create({parts,friction:.75,frictionStatic:1,restitution:.05,density:.003,frictionAir:.015});
-    const n=this.matter.add.image(x,y,'nut').setDisplaySize(52, 48).setExistingBody(body).setOrigin(.5, .56).setDepth(4); n.born=this.time.now; n.stable=0;n.counted=false;n.lost=false;
+    // Convex outline follows the photographed nut's sloping horns and lower point.
+    const M = Phaser.Physics.Matter.Matter;
+    const vertices = [{x:-25,y:-13},{x:-4,y:-8},{x:25,y:1},{x:-7,y:14},{x:-15,y:4}];
+    const center = M.Vertices.centre(vertices);
+    const body = M.Bodies.fromVertices(x + center.x, y + center.y, vertices, {
+      friction:.75, frictionStatic:1, restitution:.05, density:.003, frictionAir:.015
+    });
+    const n=this.matter.add.image(x,y,'nut').setDisplaySize(NUT_WIDTH, NUT_HEIGHT)
+      .setExistingBody(body).setOrigin(.5 + center.x / NUT_WIDTH, .5 + center.y / NUT_HEIGHT).setDepth(4);
+    n.born=this.time.now; n.stable=0; n.counted=false; n.lost=false;
     this.nuts.push(n); this.beep(500); this.spawn();
   }
   updateHud() { this.hud.setText(`Củ: ${this.score}   Kỷ lục: ${this.best}\nMạng: ${'♥'.repeat(this.lives)}${'♡'.repeat(3-this.lives)}`); }
