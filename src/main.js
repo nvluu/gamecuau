@@ -15,7 +15,7 @@ const TEXT_RESOLUTION = Math.min(4, Math.max(2, window.devicePixelRatio * Math.m
 const RENDER_SCALE = Math.ceil(TEXT_RESOLUTION);
 const NUT_WIDTH = 52, NUT_HEIGHT = NUT_WIDTH * 533 / 800;
 const DROP_LEFT = 36, DROP_RIGHT = W - 36, DROP_CENTER = 223;
-const FALLING_NUT_DEPTH = 4, ACTIVE_NUT_DEPTH = 15;
+const FALLING_NUT_DEPTH = 4, ACTIVE_NUT_DEPTH = 3;
 const readBest = () => { try { return Number(localStorage.getItem('cu-au-best')) || 0; } catch { return 0; } };
 class Tower extends Phaser.Scene {
   constructor() { super('Tower'); }
@@ -30,7 +30,7 @@ class Tower extends Phaser.Scene {
     this.drawWorld(); this.makeBuffalo();
     this.matter.world.setBounds(-500, -20000, 1360, 21000, 32, false, false, false, false);
     this.matter.world.setGravity(0, 1.15);
-    this.matter.add.rectangle(223, DECK, 188, 18, { isStatic: true, friction: .85, label: 'cart' });
+    this.cartBody = this.matter.add.rectangle(223, DECK, 188, 18, { isStatic: true, friction: .85, label: 'cart' });
     this.hud = this.add.text(16, 19, '', {fontFamily:'Noto Sans',fontSize:'16px',color:'#263d32',fontStyle:'bold'}).setResolution(TEXT_RESOLUTION).setScrollFactor(0).setDepth(20);
     this.drag = null;
     this.input.on('pointerdown', pointer => {
@@ -70,13 +70,20 @@ class Tower extends Phaser.Scene {
     g.lineStyle(5, 0x57432d); g.lineBetween(70, 524, 144, 543);
     g.lineStyle(2, 0xb79a66); g.lineBetween(70, 522, 145, 541);
     g.lineStyle(4, 0x80623c); g.lineBetween(67, 531, 132, 550);
-    this.add.image(119, 514, 'cart').setOrigin(0).setDisplaySize(220, 90);
+    this.cartImage = this.add.image(119, 514, 'cart').setOrigin(0).setDisplaySize(220, 90);
   }
   makeBuffalo() {
     this.buffalo = this.add.container(63, 526);
     const body = this.add.image(-55, -30, 'buffalo').setOrigin(0).setDisplaySize(126, 126 * 533 / 800);
     this.buffalo.add(body);
     this.bubble=this.add.text(77,461,'',{fontFamily:'Noto Sans',fontSize:'13px',color:'#31473a',backgroundColor:'#fff7d8',padding:{x:8,y:6}}).setResolution(TEXT_RESOLUTION).setDepth(10).setVisible(false);
+  }
+  setCartExpanded(expanded) {
+    const width = expanded ? 228 : 188;
+    const currentWidth = this.cartBody.bounds.max.x - this.cartBody.bounds.min.x;
+    Phaser.Physics.Matter.Matter.Body.scale(this.cartBody, width / currentWidth, 1);
+    this.cartImage.setDisplaySize(expanded ? 260 : 220, 90).setX(expanded ? 93 : 119);
+    this.cartExpanded = expanded;
   }
   showMenu(finished = false) {
     this.mode = 'menu';
@@ -101,6 +108,7 @@ class Tower extends Phaser.Scene {
     for(const n of this.nuts) n.destroy(); this.nuts=[];
     this.cameras.main.setScroll(0,0); this.score=0; this.lives=3; this.mode='play'; this.bubble.setText('').setVisible(false); this.targetScroll=0;
     this.drag = null;
+    this.setCartExpanded(false);
     this.unlockAudio(); this.spawn(); this.updateHud();
   }
   unlockAudio() { if(!this.audio) { const Audio=window.AudioContext||window.webkitAudioContext; if(Audio) this.audio=new Audio(); } if(this.audio?.state==='suspended') this.audio.resume(); }
@@ -146,7 +154,8 @@ class Tower extends Phaser.Scene {
     }
   }
   scoreNut(n) {
-    n.counted=true; this.score++; this.best=Math.max(this.best,this.score); try{localStorage.setItem('cu-au-best',String(this.best));}catch{}
+    n.counted=true; this.score++;
+    if(this.score >= 5 && !this.cartExpanded) this.setCartExpanded(true); this.best=Math.max(this.best,this.score); try{localStorage.setItem('cu-au-best',String(this.best));}catch{}
     this.updateHud();this.beep(750,.12);
     const reactions={10:'Mười củ! Trâu phục bạn!',15:'Ê… xe có chịu nổi không?',20:'Trâu xin nghỉ phép! 🐃',24:'Đủ chuyến rồi, đi thôi!'};
     if(reactions[this.score]) {this.bubble.setText(reactions[this.score]).setVisible(true);this.tweens.add({targets:this.buffalo,angle:8,duration:130,yoyo:true,repeat:5});this.time.delayedCall(2400,()=>this.bubble.setText('').setVisible(false));}

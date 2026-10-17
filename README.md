@@ -24,7 +24,7 @@ Bản xuất tĩnh nằm trong `dist/`. `base: './'` hỗ trợ đường dẫn 
 
 Bấm **Bắt đầu**. Củ ấu xuất hiện đứng yên phía trên tâm xe. Giữ ngón tay ở vùng chơi dưới thanh điểm và kéo trái/phải để di chuyển củ; nhấc ngón tay để thả. Trên máy tính, giữ chuột, kéo rồi thả nút chuột. Củ đứng ổn định được tính một điểm; củ mới xuất hiện ngay phía trên tâm xe sau mỗi lần thả. Mỗi củ rơi khỏi xe xuống dưới vùng chơi mất một mạng, kể cả củ đã ghi điểm. Mất ba mạng kết thúc lượt và quay ngay về màn hình đầu, hiển thị số củ vừa xếp và kỷ lục. Bấm Bắt đầu để chơi lượt mới. Điểm là số củ đã xếp thành công trong lượt; củ rơi sau đó không trừ điểm đã ghi.
 
-Camera đi lên theo tháp. Củ ấu không tự di chuyển ngang. Củ mới có góc xoay ngẫu nhiên và luôn hiển thị phía trên các củ đã thả; góc xoay được giữ nguyên khi thả. Màn hình đầu nhúng video YouTube và có nút Bắt đầu; game không có nút âm thanh. Kỷ lục lưu bằng localStorage; nếu trình duyệt chặn lưu trữ, game vẫn chơi được. Không có quay chậm hoặc chia sẻ điểm.
+Đạt 5 điểm, xe và mặt đỡ vật lý mở rộng chiều ngang một lần để chứa thêm củ. Khi chơi lượt mới, xe trở về kích thước ban đầu. Camera đi lên theo tháp. Củ ấu không tự di chuyển ngang. Củ mới có góc xoay ngẫu nhiên và luôn hiển thị phía dưới các củ đã thả; góc xoay được giữ nguyên khi thả. Màn hình đầu nhúng video YouTube và có nút Bắt đầu; game không có nút âm thanh. Kỷ lục lưu bằng localStorage; nếu trình duyệt chặn lưu trữ, game vẫn chơi được. Không có quay chậm hoặc chia sẻ điểm.
 
 ## GitHub Pages
 
