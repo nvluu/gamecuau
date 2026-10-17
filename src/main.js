@@ -15,7 +15,7 @@ const W = 360, H = 640, DECK = 533;
 const TEXT_RESOLUTION = Math.min(4, Math.max(2, window.devicePixelRatio * Math.min(window.innerWidth / W, window.innerHeight / H)));
 const RENDER_SCALE = Math.ceil(TEXT_RESOLUTION);
 const NUT_WIDTH = 52, NUT_HEIGHT = NUT_WIDTH * 533 / 800;
-const DROP_LEFT = 36, DROP_RIGHT = W - 36, DROP_CENTER = 223;
+const DROP_LEFT = 36, DROP_RIGHT = W - 36;
 const FALLING_NUT_DEPTH = 4, ACTIVE_NUT_DEPTH = 3;
 const readBest = () => { try { return Number(localStorage.getItem('cu-au-best')) || 0; } catch { return 0; } };
 class Tower extends Phaser.Scene {
@@ -124,7 +124,7 @@ class Tower extends Phaser.Scene {
   beep(f=400,d=.08) { if(!this.soundOn||!this.audio) return; const o=this.audio.createOscillator(),g=this.audio.createGain(); o.type='triangle'; o.frequency.setValueAtTime(f,this.audio.currentTime); o.frequency.exponentialRampToValueAtTime(f/2,this.audio.currentTime+d); g.gain.setValueAtTime(.08,this.audio.currentTime); g.gain.exponentialRampToValueAtTime(.001,this.audio.currentTime+d); o.connect(g);g.connect(this.audio.destination);o.start();o.stop(this.audio.currentTime+d); }
   spawn() {
     if(this.mode!=='play') return;
-    const x = DROP_CENTER;
+    const x = Phaser.Math.FloatBetween(DROP_LEFT, DROP_RIGHT);
     this.active = this.add.image(x, this.cameras.main.scrollY + 130, 'nut').setDisplaySize(NUT_WIDTH, NUT_HEIGHT)
       .setAngle(Phaser.Math.FloatBetween(-180, 180)).setDepth(ACTIVE_NUT_DEPTH);
   }
