@@ -124,9 +124,14 @@ class Tower extends Phaser.Scene {
   beep(f=400,d=.08) { if(!this.soundOn||!this.audio) return; const o=this.audio.createOscillator(),g=this.audio.createGain(); o.type='triangle'; o.frequency.setValueAtTime(f,this.audio.currentTime); o.frequency.exponentialRampToValueAtTime(f/2,this.audio.currentTime+d); g.gain.setValueAtTime(.08,this.audio.currentTime); g.gain.exponentialRampToValueAtTime(.001,this.audio.currentTime+d); o.connect(g);g.connect(this.audio.destination);o.start();o.stop(this.audio.currentTime+d); }
   spawn() {
     if(this.mode!=='play') return;
-    const x = Phaser.Math.FloatBetween(DROP_LEFT, DROP_RIGHT);
+    const angle = Phaser.Math.FloatBetween(-180, 180);
+    const radians = Phaser.Math.DegToRad(angle);
+    const halfWidth = (Math.abs(Math.cos(radians)) * NUT_WIDTH + Math.abs(Math.sin(radians)) * NUT_HEIGHT) / 2;
+    const x = Phaser.Math.FloatBetween(
+      this.cartBody.bounds.min.x + halfWidth, this.cartBody.bounds.max.x - halfWidth
+    );
     this.active = this.add.image(x, this.cameras.main.scrollY + 130, 'nut').setDisplaySize(NUT_WIDTH, NUT_HEIGHT)
-      .setAngle(Phaser.Math.FloatBetween(-180, 180)).setDepth(ACTIVE_NUT_DEPTH);
+      .setAngle(angle).setDepth(ACTIVE_NUT_DEPTH);
   }
   moveNut(pointer) {
     if (this.mode !== 'play' || !this.active || !this.drag || this.drag.id !== pointer.id) return;
