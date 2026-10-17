@@ -14,7 +14,7 @@ const W = 360, H = 640, DECK = 533;
 const TEXT_RESOLUTION = Math.min(4, Math.max(2, window.devicePixelRatio * Math.min(window.innerWidth / W, window.innerHeight / H)));
 const RENDER_SCALE = Math.ceil(TEXT_RESOLUTION);
 const NUT_WIDTH = 52, NUT_HEIGHT = NUT_WIDTH * 533 / 800;
-const DROP_LEFT = 36, DROP_RIGHT = W - 36;
+const DROP_LEFT = 36, DROP_RIGHT = W - 36, DROP_CENTER = 223;
 const readBest = () => { try { return Number(localStorage.getItem('cu-au-best')) || 0; } catch { return 0; } };
 class Tower extends Phaser.Scene {
   constructor() { super('Tower'); }
@@ -31,7 +31,28 @@ class Tower extends Phaser.Scene {
     this.matter.world.setGravity(0, 1.15);
     this.matter.add.rectangle(223, DECK, 188, 18, { isStatic: true, friction: .85, label: 'cart' });
     this.hud = this.add.text(16, 19, '', {fontFamily:'Noto Sans',fontSize:'16px',color:'#263d32',fontStyle:'bold'}).setResolution(TEXT_RESOLUTION).setScrollFactor(0).setDepth(20);
-    this.input.on('pointerdown', pointer => { if (this.mode === 'play' && pointer.y / RENDER_SCALE > 65 && this.active) this.drop(); });
+    this.drag = null;
+    this.input.on('pointerdown', pointer => {
+      if (this.mode !== 'play' || !this.active || this.drag || pointer.y / RENDER_SCALE <= 65) return;
+      this.drag = { id: pointer.id, pointerX: pointer.x / RENDER_SCALE, nutX: this.active.x };
+    });
+    this.input.on('pointermove', pointer => this.moveNut(pointer));
+    const release = pointer => {
+      if (!this.drag || this.drag.id !== pointer.id) return;
+      this.moveNut(pointer);
+      this.drag = null;
+      this.drop();
+    };
+    this.input.on('pointerup', release);
+    this.input.on('pointerupoutside', release);
+    // Losing focus cancels a gesture rather than dropping an unintended nut.
+    this.cancelDrag = () => { this.drag = null; };
+    this.game.events.on(Phaser.Core.Events.BLUR, this.cancelDrag);
+    this.input.manager.canvas.addEventListener('pointercancel', this.cancelDrag);
+    this.events.once('shutdown', () => {
+      this.game.events.off(Phaser.Core.Events.BLUR, this.cancelDrag);
+      this.input.manager.canvas.removeEventListener('pointercancel', this.cancelDrag);
+    });
     this.events.on('shutdown', () => { if (this.audio) this.audio.close(); });
     this.showMenu();
   }
@@ -58,6 +79,7 @@ class Tower extends Phaser.Scene {
   }
   showMenu(finished = false) {
     this.mode = 'menu';
+    this.drag = null;
     const intro = document.getElementById('intro');
     const result = document.getElementById('intro-result');
     result.hidden = !finished;
@@ -77,15 +99,21 @@ class Tower extends Phaser.Scene {
     if(this.active) { this.active.destroy(); this.active = null; }
     for(const n of this.nuts) n.destroy(); this.nuts=[];
     this.cameras.main.setScroll(0,0); this.score=0; this.lives=3; this.mode='play'; this.bubble.setText('').setVisible(false); this.targetScroll=0;
+    this.drag = null;
     this.unlockAudio(); this.spawn(); this.updateHud();
   }
   unlockAudio() { if(!this.audio) { const Audio=window.AudioContext||window.webkitAudioContext; if(Audio) this.audio=new Audio(); } if(this.audio?.state==='suspended') this.audio.resume(); }
   beep(f=400,d=.08) { if(!this.soundOn||!this.audio) return; const o=this.audio.createOscillator(),g=this.audio.createGain(); o.type='triangle'; o.frequency.setValueAtTime(f,this.audio.currentTime); o.frequency.exponentialRampToValueAtTime(f/2,this.audio.currentTime+d); g.gain.setValueAtTime(.08,this.audio.currentTime); g.gain.exponentialRampToValueAtTime(.001,this.audio.currentTime+d); o.connect(g);g.connect(this.audio.destination);o.start();o.stop(this.audio.currentTime+d); }
   spawn() {
     if(this.mode!=='play') return;
-    this.direction = Phaser.Math.Between(0, 1) ? 1 : -1;
-    const x = Phaser.Math.FloatBetween(DROP_LEFT, DROP_RIGHT);
+    const x = DROP_CENTER;
     this.active = this.add.image(x, this.cameras.main.scrollY + 130, 'nut').setDisplaySize(NUT_WIDTH, NUT_HEIGHT).setDepth(5);
+  }
+  moveNut(pointer) {
+    if (this.mode !== 'play' || !this.active || !this.drag || this.drag.id !== pointer.id) return;
+    this.active.x = Phaser.Math.Clamp(
+      this.drag.nutX + pointer.x / RENDER_SCALE - this.drag.pointerX, DROP_LEFT, DROP_RIGHT
+    );
   }
   drop() {
     if(this.mode!=='play' || !this.active) return;
@@ -120,10 +148,6 @@ class Tower extends Phaser.Scene {
     if(this.mode!=='play')return;
     const dt=Math.min(delta,50);
     if(this.active) {
-      const speed = 145 + Math.min(this.nuts.length, 40) * 4;
-      this.active.x += this.direction * speed * dt / 1000;
-      if(this.active.x > DROP_RIGHT) { this.active.x = 2 * DROP_RIGHT - this.active.x; this.direction = -1; }
-      if(this.active.x < DROP_LEFT) { this.active.x = 2 * DROP_LEFT - this.active.x; this.direction = 1; }
       this.active.y = this.cameras.main.scrollY + 130;
     }
     let top=DECK;
