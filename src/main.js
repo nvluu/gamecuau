@@ -15,6 +15,7 @@ const TEXT_RESOLUTION = Math.min(4, Math.max(2, window.devicePixelRatio * Math.m
 const RENDER_SCALE = Math.ceil(TEXT_RESOLUTION);
 const NUT_WIDTH = 52, NUT_HEIGHT = NUT_WIDTH * 533 / 800;
 const DROP_LEFT = 36, DROP_RIGHT = W - 36, DROP_CENTER = 223;
+const FALLING_NUT_DEPTH = 4, ACTIVE_NUT_DEPTH = 15;
 const readBest = () => { try { return Number(localStorage.getItem('cu-au-best')) || 0; } catch { return 0; } };
 class Tower extends Phaser.Scene {
   constructor() { super('Tower'); }
@@ -107,7 +108,8 @@ class Tower extends Phaser.Scene {
   spawn() {
     if(this.mode!=='play') return;
     const x = DROP_CENTER;
-    this.active = this.add.image(x, this.cameras.main.scrollY + 130, 'nut').setDisplaySize(NUT_WIDTH, NUT_HEIGHT).setDepth(5);
+    this.active = this.add.image(x, this.cameras.main.scrollY + 130, 'nut').setDisplaySize(NUT_WIDTH, NUT_HEIGHT)
+      .setAngle(Phaser.Math.FloatBetween(-180, 180)).setDepth(ACTIVE_NUT_DEPTH);
   }
   moveNut(pointer) {
     if (this.mode !== 'play' || !this.active || !this.drag || this.drag.id !== pointer.id) return;
@@ -117,16 +119,21 @@ class Tower extends Phaser.Scene {
   }
   drop() {
     if(this.mode!=='play' || !this.active) return;
-    const {x,y}=this.active; this.active.destroy(); this.active=null;
+    const {x,y,rotation}=this.active; this.active.destroy(); this.active=null;
     // Convex outline follows the photographed nut's sloping horns and lower point.
     const M = Phaser.Physics.Matter.Matter;
     const vertices = [{x:-25,y:-13},{x:-4,y:-8},{x:25,y:1},{x:-7,y:14},{x:-15,y:4}];
     const center = M.Vertices.centre(vertices);
-    const body = M.Bodies.fromVertices(x + center.x, y + center.y, vertices, {
+    const cos = Math.cos(rotation), sin = Math.sin(rotation);
+    const body = M.Bodies.fromVertices(
+      x + center.x * cos - center.y * sin,
+      y + center.x * sin + center.y * cos, vertices, {
       friction:.75, frictionStatic:1, restitution:.05, density:.003, frictionAir:.015
     });
+    M.Body.setAngle(body, rotation);
     const n=this.matter.add.image(x,y,'nut').setDisplaySize(NUT_WIDTH, NUT_HEIGHT)
-      .setExistingBody(body).setOrigin(.5 + center.x / NUT_WIDTH, .5 + center.y / NUT_HEIGHT).setDepth(4);
+      .setExistingBody(body).setOrigin(.5 + center.x / NUT_WIDTH, .5 + center.y / NUT_HEIGHT)
+      .setRotation(rotation).setDepth(FALLING_NUT_DEPTH);
     n.born=this.time.now; n.stable=0; n.counted=false; n.lost=false;
     this.nuts.push(n); this.beep(500); this.spawn();
   }
