@@ -34,7 +34,7 @@ class Tower extends Phaser.Scene {
     this.matter.world.setGravity(0, 1.15);
     this.cartBody = this.matter.add.rectangle(223, DECK, 188, 18, { isStatic: true, friction: .85, label: 'cart' });
     this.hud = this.add.text(16, 19, '', {fontFamily:'Noto Sans',fontSize:'16px',color:'#263d32',fontStyle:'bold'}).setResolution(TEXT_RESOLUTION).setScrollFactor(0).setDepth(20);
-    this.cartHint = this.add.text(W / 2, 86, 'Đủ 5 củ xe to ra', {fontFamily:'Noto Sans',fontSize:'16px',fontStyle:'bold',color:'#38634c'})
+    this.cartHint = this.add.text(W / 2, 86, 'Đủ 15 củ xe to ra', {fontFamily:'Noto Sans',fontSize:'16px',fontStyle:'bold',color:'#38634c'})
       .setResolution(TEXT_RESOLUTION).setOrigin(.5).setScrollFactor(0).setDepth(20).setVisible(false);
     this.drag = null;
     this.input.on('pointerdown', pointer => {
@@ -164,7 +164,7 @@ class Tower extends Phaser.Scene {
   }
   scoreNut(n) {
     n.counted=true; this.score++;
-    if(this.score >= 5 && !this.cartExpanded) this.setCartExpanded(true); this.best=Math.max(this.best,this.score); try{localStorage.setItem('cu-au-best',String(this.best));}catch{}
+    if(this.score >= 15 && !this.cartExpanded) this.setCartExpanded(true); this.best=Math.max(this.best,this.score); try{localStorage.setItem('cu-au-best',String(this.best));}catch{}
     this.updateHud();this.beep(750,.12);
     const reactions={10:'Mười củ! Trâu phục bạn!',15:'Ê… xe có chịu nổi không?',20:'Trâu xin nghỉ phép! 🐃',24:'Đủ chuyến rồi, đi thôi!'};
     if(reactions[this.score]) {this.bubble.setText(reactions[this.score]).setVisible(true);this.tweens.add({targets:this.buffalo,angle:8,duration:130,yoyo:true,repeat:5});this.time.delayedCall(2400,()=>this.bubble.setText('').setVisible(false));}
