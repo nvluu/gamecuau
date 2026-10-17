@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+<defs><radialGradient id="rim"><stop stop-color="#b49561"/><stop offset=".78" stop-color="#80623c"/><stop offset="1" stop-color="#453b2e"/></radialGradient></defs>
+<g stroke="#3e3528" stroke-width="2">
+<circle cx="24" cy="24" r="22" fill="url(#rim)"/>
+<path d="M24 4v40M4 24h40M10 10l28 28M10 38l28-28" stroke="#543e28" stroke-width="3"/>
+<circle cx="24" cy="24" r="19" fill="none" stroke="#c6a471"/>
+<circle cx="24" cy="24" r="6" fill="#6b614b"/>
+<circle cx="24" cy="24" r="2" fill="#b6a780"/>
+</g></svg>

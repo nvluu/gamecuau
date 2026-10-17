@@ -9,6 +9,7 @@ import './style.css';
 import nutArt from './assets/ca1png.png?url&no-inline';
 import buffaloArt from './assets/ca2png.png?url&no-inline';
 import cartArt from './assets/cart.svg?url&no-inline';
+import wheelArt from './assets/wheel.svg?url&no-inline';
 
 const W = 360, H = 640, DECK = 533;
 const TEXT_RESOLUTION = Math.min(4, Math.max(2, window.devicePixelRatio * Math.min(window.innerWidth / W, window.innerHeight / H)));
@@ -23,6 +24,7 @@ class Tower extends Phaser.Scene {
     this.load.image('nut', nutArt);
     this.load.image('buffalo', buffaloArt);
     this.load.svg('cart', cartArt, { width: 660, height: 270 });
+    this.load.svg('wheel', wheelArt, { width: 144, height: 144 });
   }
   create() {
     this.cameras.main.setOrigin(0, 0).setZoom(RENDER_SCALE);
@@ -32,6 +34,8 @@ class Tower extends Phaser.Scene {
     this.matter.world.setGravity(0, 1.15);
     this.cartBody = this.matter.add.rectangle(223, DECK, 188, 18, { isStatic: true, friction: .85, label: 'cart' });
     this.hud = this.add.text(16, 19, '', {fontFamily:'Noto Sans',fontSize:'16px',color:'#263d32',fontStyle:'bold'}).setResolution(TEXT_RESOLUTION).setScrollFactor(0).setDepth(20);
+    this.cartHint = this.add.text(W / 2, 86, 'Đủ 5 củ xe to ra', {fontFamily:'Noto Sans',fontSize:'16px',fontStyle:'bold',color:'#38634c'})
+      .setResolution(TEXT_RESOLUTION).setOrigin(.5).setScrollFactor(0).setDepth(20).setVisible(false);
     this.drag = null;
     this.input.on('pointerdown', pointer => {
       if (this.mode !== 'play' || !this.active || this.drag || pointer.y / RENDER_SCALE <= 65) return;
@@ -71,6 +75,7 @@ class Tower extends Phaser.Scene {
     g.lineStyle(2, 0xb79a66); g.lineBetween(70, 522, 145, 541);
     g.lineStyle(4, 0x80623c); g.lineBetween(67, 531, 132, 550);
     this.cartImage = this.add.image(119, 514, 'cart').setOrigin(0).setDisplaySize(220, 90);
+    this.cartWheels = [40, 180].map(x => this.add.image(119 + x, 574, 'wheel').setDisplaySize(48, 48));
   }
   makeBuffalo() {
     this.buffalo = this.add.container(63, 526);
@@ -83,10 +88,14 @@ class Tower extends Phaser.Scene {
     const currentWidth = this.cartBody.bounds.max.x - this.cartBody.bounds.min.x;
     Phaser.Physics.Matter.Matter.Body.scale(this.cartBody, width / currentWidth, 1);
     this.cartImage.setDisplaySize(expanded ? 260 : 220, 90).setX(expanded ? 93 : 119);
+    // Move the wheels along the axle without stretching their circular textures.
+    this.cartWheels.forEach((wheel, i) => wheel.setX(this.cartImage.x + [40, 180][i] * this.cartImage.displayWidth / 220));
+    this.cartHint.setVisible(this.mode === 'play' && !expanded);
     this.cartExpanded = expanded;
   }
   showMenu(finished = false) {
     this.mode = 'menu';
+    this.cartHint.setVisible(false);
     this.drag = null;
     const intro = document.getElementById('intro');
     const result = document.getElementById('intro-result');

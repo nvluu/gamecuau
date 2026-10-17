@@ -8,11 +8,5 @@
 <path d="m15 18 31 1m-28 8 29-1m25-6 39-1m22 2 35 1m19-4 16 1" stroke="#d3af70" stroke-width=".8" opacity=".7"/>
 <path d="m24 21 15-1m42 7 24-1m28-12 24 1m27 10 13-1" stroke="#483c2c" stroke-width=".7" opacity=".6"/>
 <g fill="#454239"><circle cx="14" cy="14" r="1.6"/><circle cx="14" cy="26" r="1.6"/><circle cx="201" cy="14" r="1.6"/><circle cx="201" cy="26" r="1.6"/></g>
-<g stroke="#3e3528" stroke-width="2">
- <circle cx="40" cy="60" r="22" fill="url(#rim)"/><circle cx="180" cy="60" r="22" fill="url(#rim)"/>
- <g stroke="#543e28" stroke-width="3"><path d="M40 40v40M20 60h40M26 46l28 28M26 74l28-28M180 40v40M160 60h40M166 46l28 28M166 74l28-28"/></g>
- <circle cx="40" cy="60" r="19" fill="none" stroke="#c6a471"/><circle cx="180" cy="60" r="19" fill="none" stroke="#c6a471"/>
- <circle cx="40" cy="60" r="6" fill="#6b614b"/><circle cx="180" cy="60" r="6" fill="#6b614b"/>
- <circle cx="40" cy="60" r="2" fill="#b6a780"/><circle cx="180" cy="60" r="2" fill="#b6a780"/>
-</g>
+
 </svg>
