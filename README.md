@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Mở địa chỉ Vite hiển thị. Trên điện thoại cùng mạng, dùng địa chỉ Network. Game giữ khung dọc 360 × 640, tự thu phóng theo màn hình.
+Mở địa chỉ Vite hiển thị. Trên điện thoại cùng mạng, dùng địa chỉ Network. Game giữ khung dọc 360 × 640, tự thu phóng theo màn hình. Nền menu và cảnh chơi tiếp tục phủ phần trống phía trên/dưới trên điện thoại màn hình dài; vùng điều khiển vẫn giữ nguyên tỷ lệ.
 
 ```sh
 npm run build

@@ -4,6 +4,7 @@ body { font-family: "Noto Sans", sans-serif; font-synthesis: none; }
 /* CSS alone centers the frame; Phaser must not add another centering margin. */
 #game {
   position: fixed;
+  isolation: isolate;
   inset: 0;
   margin: auto;
   width: min(100vw, 56.25vh);
@@ -72,3 +73,23 @@ canvas { display: block; touch-action: none; }
 }
 #intro-result[hidden] { display: none; }
 #intro:has(#intro-result:not([hidden])) .intro-video { height: 60%; }
+
+/* Continue the scene above and below the 9:16 play area on tall phones. */
+#game::before, #game::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 100vmax;
+  pointer-events: none;
+  z-index: -1;
+  background: #ffedba;
+}
+#game::before { bottom: 100%; }
+#game::after { top: 100%; }
+body[data-screen="play"] #game::after {
+  background: linear-gradient(to bottom,
+    #ffedba 0 var(--extension-field, 0px),
+    #e8b83e var(--extension-field, 0px) var(--extension-ground, 0px),
+    #9d7138 var(--extension-ground, 0px));
+}

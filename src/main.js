@@ -95,6 +95,7 @@ class Tower extends Phaser.Scene {
   }
   showMenu(finished = false) {
     this.mode = 'menu';
+    document.body.dataset.screen = 'menu';
     this.cartHint.setVisible(false);
     this.drag = null;
     const intro = document.getElementById('intro');
@@ -117,6 +118,8 @@ class Tower extends Phaser.Scene {
     for(const n of this.nuts) n.destroy(); this.nuts=[];
     this.cameras.main.setScroll(0,0); this.score=0; this.lives=3; this.mode='play'; this.bubble.setText('').setVisible(false); this.targetScroll=0;
     this.drag = null;
+    document.body.dataset.screen = 'play';
+    this.updateBackdrop();
     this.setCartExpanded(false);
     this.unlockAudio(); this.spawn(); this.updateHud();
   }
@@ -174,6 +177,13 @@ class Tower extends Phaser.Scene {
     const reactions={10:'Mười củ! Trâu phục bạn!',15:'Ê… xe có chịu nổi không?',20:'Trâu xin nghỉ phép! 🐃',24:'Đủ chuyến rồi, đi thôi!'};
     if(reactions[this.score]) {this.bubble.setText(reactions[this.score]).setVisible(true);this.tweens.add({targets:this.buffalo,angle:8,duration:130,yoyo:true,repeat:5});this.time.delayedCall(2400,()=>this.bubble.setText('').setVisible(false));}
   }
+  updateBackdrop() {
+    const frame = document.getElementById('game');
+    const scale = frame.clientHeight / H;
+    const bottom = H + this.cameras.main.scrollY;
+    frame.style.setProperty('--extension-field', `${Math.max(0, (430 - bottom) * scale)}px`);
+    frame.style.setProperty('--extension-ground', `${Math.max(0, (580 - bottom) * scale)}px`);
+  }
   update(_time,delta) {
     if(this.mode!=='play')return;
     const dt=Math.min(delta,50);
@@ -190,6 +200,7 @@ class Tower extends Phaser.Scene {
     }
     this.targetScroll=Math.min(0,top-265);
     this.cameras.main.scrollY=Phaser.Math.Linear(this.cameras.main.scrollY,this.targetScroll,.045);
+    this.updateBackdrop();
   }
 }
 export let game;
